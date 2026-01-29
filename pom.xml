@@ -46,10 +46,6 @@
         <opentelemetry.version>1.35.0</opentelemetry.version>
         <opentelemetry-instrumentation.version>2.1.0</opentelemetry-instrumentation.version>
 
-        <!-- Checkstyle suppressions -->
-        <checkstyle.config.suppressions.path>
-            ./src/main/resources/checkstyle/checkstyle-suppressions.xml
-        </checkstyle.config.suppressions.path>
     </properties>
 
     <dependencyManagement>
@@ -97,6 +93,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- JSR-305 annotations (for @Nullable) -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Spring -->

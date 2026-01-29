@@ -187,11 +187,21 @@ class PathValueExtractorTest {
 
     @SuppressWarnings("unused")
     public static class TestService {
-        public void simpleMethod(String userId) {}
-        public void methodWithInteger(Integer count) {}
-        public void methodWithRequest(TestRequest request) {}
-        public void methodWithRecord(TestRecord record) {}
-        public void multipleParams(String id, Integer count, String name) {}
+
+        public void simpleMethod(String userId) {
+        }
+
+        public void methodWithInteger(Integer count) {
+        }
+
+        public void methodWithRequest(TestRequest request) {
+        }
+
+        public void methodWithRecord(TestRecord record) {
+        }
+
+        public void multipleParams(String id, Integer count, String name) {
+        }
     }
 
     public static class TestRequest {
