@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  * <ul>
  *   <li>Method parameter names must be available at runtime (compile with {@code -parameters})</li>
  *   <li>Each {@code key} within a single annotation must be unique</li>
- *   <li>Each {@code path} must start with {@code #parameterName}</li>
+ *   <li>Each {@code path} must be a valid SpEL expression</li>
  * </ul>
  *
  * @see BaggageField

@@ -41,20 +41,25 @@ public @interface BaggageField {
     String key();
 
     /**
-     * The path to extract the value from method arguments.
+     * SpEL expression to extract a value.
      * <p>
-     * Must start with {@code #} followed by the parameter name.
-     * Supports dot-notation for nested field access.
+     * Supports:
+     * <ul>
+     *   <li>Method arguments via variables ({@code #userId}, {@code #request.user.id}, {@code #p0})</li>
+     *   <li>Root object access (target bean), e.g. {@code tenantId} or {@code getTenantId()}</li>
+     *   <li>Regular SpEL operators and null-safe navigation ({@code ?.})</li>
+     * </ul>
      *
      * <p>Examples:
      * <ul>
      *   <li>{@code #userId} - extracts the userId parameter directly</li>
      *   <li>{@code #request.user.id} - navigates to request.getUser().getId()</li>
-     *   <li>{@code #order.customer.email} - nested field access</li>
+     *   <li>{@code #order.customer?.email} - null-safe nested field access</li>
+     *   <li>{@code getDefaultTenantId()} - invoke method on target bean</li>
      * </ul>
      *
-     * <p><b>Note:</b> Parameter names must be available at runtime.
-     * Spring Boot Starter Parent enables this automatically.
+     * <p><b>Note:</b> Named argument access ({@code #paramName}) requires parameter names
+     * to be available at runtime. Spring Boot Starter Parent enables this automatically.
      *
      * @return the extraction path
      */

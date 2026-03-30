@@ -107,17 +107,20 @@ public void tracedOperation(String userId, String traceId) {
 | `converter` | `Class<? extends BaggageValueConverter<?>>` | `NoOp` | Класс кастомного конвертера |
 | `converterBean` | `String` | `""` | Имя Spring Bean конвертера |
 
-## Синтаксис путей
+## Синтаксис выражений
 
-Путь должен начинаться с `#` и имени параметра метода:
+`path` — это SpEL-выражение. Поддерживаются:
 
 ```
-#userId                    // Параметр целиком
-#request.userId           // request.getUserId()
-#order.customer.email     // order.getCustomer().getEmail()
+#userId                    // параметр по имени
+#request.userId            // вложенное свойство аргумента
+#order.customer?.email     // null-safe навигация
+#p0                        // параметр по индексу
+defaultTenantId            // свойство target-объекта (root object)
+getDefaultTenantId()       // метод target-объекта
 ```
 
-> **Примечание:** Работает из коробки со Spring Boot. Если имена параметров не распознаются, добавьте в maven-compiler-plugin опцию `<parameters>true</parameters>`.
+> **Примечание:** Для доступа к параметрам по имени (`#userId`) имена параметров должны быть доступны в рантайме (`<parameters>true</parameters>`). Можно использовать `#p0/#a0` как fallback.
 
 ## Конвертация значений
 
@@ -210,13 +213,13 @@ public class CustomBaggifyConfig {
 Примеры ситуаций, которые логируются как предупреждения:
 
 - `key` пустой или `null`
-- `path` не начинается с `#`
+- невалидное SpEL-выражение в `path`
 - Параметр с указанным именем не найден
 - Дублирующиеся ключи в одной аннотации
 - Ошибка в кастомном конвертере
 
 ```
-WARN  WithBaggageAspect : Method 'process': @BaggageField path 'userId' for key 'user.id' must start with '#', skipping
+WARN  PathValueExtractor : Failed to extract value at path 'bad(' from method 'process': ...
 WARN  WithBaggageAspect : Method 'process': Duplicate baggage key 'user.id', only first occurrence will be used
 ```
 

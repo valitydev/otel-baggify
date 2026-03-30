@@ -27,7 +27,7 @@ class PathValueExtractorTest {
         void shouldReturnNullForNullPath() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue(null, method, new Object[]{"value"});
+            Object result = extractor.extractValue(null, method, new Object[]{"value"}, null);
 
             assertThat(result).isNull();
         }
@@ -37,7 +37,7 @@ class PathValueExtractorTest {
         void shouldReturnNullForBlankPath() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue("  ", method, new Object[]{"value"});
+            Object result = extractor.extractValue("  ", method, new Object[]{"value"}, null);
 
             assertThat(result).isNull();
         }
@@ -47,7 +47,7 @@ class PathValueExtractorTest {
         void shouldReturnNullForPathWithoutHashPrefix() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue("userId", method, new Object[]{"value"});
+            Object result = extractor.extractValue("userId", method, new Object[]{"value"}, null);
 
             assertThat(result).isNull();
         }
@@ -57,7 +57,7 @@ class PathValueExtractorTest {
         void shouldReturnNullForPathWithOnlyHash() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue("#", method, new Object[]{"value"});
+            Object result = extractor.extractValue("#", method, new Object[]{"value"}, null);
 
             assertThat(result).isNull();
         }
@@ -72,7 +72,7 @@ class PathValueExtractorTest {
         void shouldExtractStringParameter() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue("#userId", method, new Object[]{"test-user"});
+            Object result = extractor.extractValue("#userId", method, new Object[]{"test-user"}, null);
 
             assertThat(result).isEqualTo("test-user");
         }
@@ -82,7 +82,7 @@ class PathValueExtractorTest {
         void shouldExtractIntegerParameter() throws Exception {
             Method method = TestService.class.getMethod("methodWithInteger", Integer.class);
 
-            Object result = extractor.extractValue("#count", method, new Object[]{42});
+            Object result = extractor.extractValue("#count", method, new Object[]{42}, null);
 
             assertThat(result).isEqualTo(42);
         }
@@ -92,7 +92,7 @@ class PathValueExtractorTest {
         void shouldReturnNullForNullParameter() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue("#userId", method, new Object[]{null});
+            Object result = extractor.extractValue("#userId", method, new Object[]{null}, null);
 
             assertThat(result).isNull();
         }
@@ -102,7 +102,7 @@ class PathValueExtractorTest {
         void shouldReturnNullForUnknownParameter() throws Exception {
             Method method = TestService.class.getMethod("simpleMethod", String.class);
 
-            Object result = extractor.extractValue("#unknown", method, new Object[]{"value"});
+            Object result = extractor.extractValue("#unknown", method, new Object[]{"value"}, null);
 
             assertThat(result).isNull();
         }
@@ -118,7 +118,7 @@ class PathValueExtractorTest {
             Method method = TestService.class.getMethod("methodWithRequest", TestRequest.class);
             TestRequest request = new TestRequest("user-123", new TestUser("John", "john@test.com"));
 
-            Object result = extractor.extractValue("#request.userId", method, new Object[]{request});
+            Object result = extractor.extractValue("#request.userId", method, new Object[]{request}, null);
 
             assertThat(result).isEqualTo("user-123");
         }
@@ -129,7 +129,7 @@ class PathValueExtractorTest {
             Method method = TestService.class.getMethod("methodWithRequest", TestRequest.class);
             TestRequest request = new TestRequest("user-123", new TestUser("John", "john@test.com"));
 
-            Object result = extractor.extractValue("#request.user.email", method, new Object[]{request});
+            Object result = extractor.extractValue("#request.user.email", method, new Object[]{request}, null);
 
             assertThat(result).isEqualTo("john@test.com");
         }
@@ -140,7 +140,7 @@ class PathValueExtractorTest {
             Method method = TestService.class.getMethod("methodWithRequest", TestRequest.class);
             TestRequest request = new TestRequest("user-123", null);
 
-            Object result = extractor.extractValue("#request.user.email", method, new Object[]{request});
+            Object result = extractor.extractValue("#request.user.email", method, new Object[]{request}, null);
 
             assertThat(result).isNull();
         }
@@ -151,7 +151,7 @@ class PathValueExtractorTest {
             Method method = TestService.class.getMethod("methodWithRecord", TestRecord.class);
             TestRecord record = new TestRecord("record-id", "Record Name");
 
-            Object result = extractor.extractValue("#record.id", method, new Object[]{record});
+            Object result = extractor.extractValue("#record.id", method, new Object[]{record}, null);
 
             assertThat(result).isEqualTo("record-id");
         }
@@ -162,7 +162,7 @@ class PathValueExtractorTest {
             Method method = TestService.class.getMethod("methodWithRequest", TestRequest.class);
             TestRequest request = new TestRequest("user-123", new TestUser("John", "john@test.com"));
 
-            Object result = extractor.extractValue("#request.nonExistent", method, new Object[]{request});
+            Object result = extractor.extractValue("#request.nonExistent", method, new Object[]{request}, null);
 
             assertThat(result).isNull();
         }
@@ -177,9 +177,25 @@ class PathValueExtractorTest {
         void shouldExtractCorrectParameterFromMultiple() throws Exception {
             Method method = TestService.class.getMethod("multipleParams", String.class, Integer.class, String.class);
 
-            Object result = extractor.extractValue("#name", method, new Object[]{"id-1", 42, "John"});
+            Object result = extractor.extractValue("#name", method, new Object[]{"id-1", 42, "John"}, null);
 
             assertThat(result).isEqualTo("John");
+        }
+    }
+
+    @Nested
+    @DisplayName("Root object expressions")
+    class RootObjectExpressions {
+
+        @Test
+        @DisplayName("Should extract value from root object")
+        void shouldExtractValueFromRootObject() throws Exception {
+            Method method = TestService.class.getMethod("noArgsMethod");
+            RootObject root = new RootObject("tenant-42");
+
+            Object result = extractor.extractValue("tenantId", method, new Object[0], root);
+
+            assertThat(result).isEqualTo("tenant-42");
         }
     }
 
@@ -201,6 +217,9 @@ class PathValueExtractorTest {
         }
 
         public void multipleParams(String id, Integer count, String name) {
+        }
+
+        public void noArgsMethod() {
         }
     }
 
@@ -241,4 +260,16 @@ class PathValueExtractorTest {
     }
 
     public record TestRecord(String id, String name) {}
+
+    public static class RootObject {
+        private final String tenantId;
+
+        public RootObject(String tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        public String getTenantId() {
+            return tenantId;
+        }
+    }
 }

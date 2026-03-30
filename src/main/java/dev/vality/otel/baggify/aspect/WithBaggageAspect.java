@@ -84,6 +84,7 @@ public class WithBaggageAspect implements Ordered {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             Method method = signature.getMethod();
             Object[] args = joinPoint.getArgs();
+            Object target = joinPoint.getTarget();
 
             // Validate configuration and log warnings (don't fail)
             if (!validateConfiguration(withBaggage, method)) {
@@ -96,7 +97,7 @@ public class WithBaggageAspect implements Ordered {
             boolean hasEnrichment = false;
 
             for (BaggageField field : withBaggage.value()) {
-                if (processField(field, method, args, baggageBuilder, currentSpan)) {
+                if (processField(field, method, args, target, baggageBuilder, currentSpan)) {
                     hasEnrichment = true;
                 }
             }
@@ -171,12 +172,6 @@ public class WithBaggageAspect implements Ordered {
                 continue;
             }
 
-            if (!path.startsWith("#")) {
-                log.warn("Method '{}': @BaggageField path '{}' for key '{}' must start with '#', skipping",
-                        methodName, path, key);
-                continue;
-            }
-
             hasValidFields = true;
         }
 
@@ -196,14 +191,14 @@ public class WithBaggageAspect implements Ordered {
      * @param currentSpan    the current span
      * @return true if value was successfully added to baggage
      */
-    private boolean processField(BaggageField field, Method method, Object[] args,
+    private boolean processField(BaggageField field, Method method, Object[] args, Object target,
                                  BaggageBuilder baggageBuilder, Span currentSpan) {
         String key = field.key();
         String path = field.path();
 
         try {
             // Extract value using path
-            Object value = pathValueExtractor.extractValue(path, method, args);
+            Object value = pathValueExtractor.extractValue(path, method, args, target);
 
             // Skip null values silently
             if (value == null) {

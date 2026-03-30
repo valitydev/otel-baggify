@@ -97,6 +97,18 @@ class WithBaggageAspectTest {
 
             assertThat(capturedEmail.get()).isEqualTo("john@example.com");
         }
+
+        @Test
+        @DisplayName("Should enrich baggage using root object expression")
+        void shouldEnrichBaggageUsingRootObjectExpression() {
+            AtomicReference<String> capturedTenant = new AtomicReference<>();
+
+            testService.rootExpression(() -> {
+                capturedTenant.set(Baggage.current().getEntryValue("tenant.id"));
+            });
+
+            assertThat(capturedTenant.get()).isEqualTo("tenant-42");
+        }
     }
 
     @Nested
@@ -374,6 +386,11 @@ class WithBaggageAspectTest {
 
     @Service
     public static class TestServiceBean {
+        private final String defaultTenantId = "tenant-42";
+
+        public String getDefaultTenantId() {
+            return defaultTenantId;
+        }
 
         @WithBaggage(@BaggageField(key = "user.id", path = "#userId"))
         public void simpleMethod(String userId, Runnable callback) {
@@ -439,6 +456,11 @@ class WithBaggageAspectTest {
         @WithBaggage(@BaggageField(key = "test.key", path = "#value",
                 converter = FailingConverter.class))
         public void withFailingConverter(String value, Runnable callback) {
+            callback.run();
+        }
+
+        @WithBaggage(@BaggageField(key = "tenant.id", path = "getDefaultTenantId()"))
+        public void rootExpression(Runnable callback) {
             callback.run();
         }
     }
